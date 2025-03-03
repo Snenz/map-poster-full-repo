@@ -1,0 +1,3 @@
+[submodule "map-poster-web-app"]
+	path = map-poster-web-app
+	url = git@github.com:Snenz/map-poster-web-app.git
