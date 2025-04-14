@@ -1,0 +1,4 @@
+.env*
+ghcr_secrets.yml
+ddns_secrets.yml
+inventory.ini

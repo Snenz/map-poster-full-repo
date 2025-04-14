@@ -1,0 +1,26 @@
+# Azure Module Variables
+subscription_id = ""
+client_id       = ""
+client_secret   = ""
+tenant_id       = ""
+
+ressource_prefix = "MapPoster"
+location         = "westeurope"
+
+admin_username = "mapposter-admin"
+ssh_key_path   = "~/.ssh/id_ed25519.pub"
+
+# MongoDB Atlas Variables
+mongodb_atlas_public_key  = ""
+mongodb_atlas_private_key = ""
+
+mongodb_atlas_project_id = ""
+
+mongodb_atlas_cluster = "Cluster0"
+mongodb_atlas_region  = "EU_CENTRAL_1"
+
+mongodb_atlas_db_name     = "map_poster"
+mongodb_atlas_db_username = ""
+mongodb_atlas_db_password = ""
+
+mongodb_atlas_collection_name = "shared_designs"

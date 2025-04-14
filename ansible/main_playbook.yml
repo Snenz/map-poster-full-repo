@@ -1,0 +1,68 @@
+---
+- name: Update system and deploy Docker container from GHCR
+  hosts: virtual-machines
+  become: yes
+
+  vars_files:
+    - ghcr_secrets.yml # load GitHub Container Registry secrets
+    - ddns_secrets.yml # load DDNS secrets
+  
+  vars:
+    docker_image: "ghcr.io/snenz/map-poster-web-app:main" # Docker image to pull from GHCR
+    container_name: "map_poster"                          # Name of the Docker container
+
+  tasks:
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade all apt packages
+      apt:
+        upgrade: dist
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker.io
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Log in to GitHub Container Registry
+      shell: |
+        echo "{{ ghcr_token }}" | docker login ghcr.io -u "{{ ghcr_user }}" --password-stdin
+      vars:
+        ansible_become: true
+      no_log: true
+
+    - name: Pull Docker image from GHCR
+      docker_image:
+        name: "{{ docker_image }}"
+        source: pull
+        force_source: true
+
+    - name: Copy .env.production to virtual machines
+      copy:
+        src: ./.env.production
+        dest: /home/{{ ansible_user }}/.env.production
+
+    - name: Run Docker container with environment variables
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ docker_image }}"
+        env_file: /home/{{ ansible_user }}/.env.production # use .env.production file for environment variables
+        published_ports: "0.0.0.0:80:3000"                 # expose web app on port 80
+        restart_policy: always
+
+    - name: Call the ddnss update URL with custom IP
+      uri:
+        url: "https://www.ddnss.de/upd.php?key={{ ddns_key }}&host=mapposter.ddnss.de&ip={{ ansible_host }}"
+        method: GET
+        return_content: no
+        status_code: 200
+        validate_certs: yes
